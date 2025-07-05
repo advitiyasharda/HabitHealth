@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">HabitHealth</string>
     <string name="login_btn_title">Login</string>
-    <string name="register_prompt">Don\'t Have an account? Register Here</string>
+    <string name="register_prompt">Don&apos;t Have an account? Register Here</string>
     <string name="email_hint">Email</string>
     <string name="password_hint">Password</string>
     <string name="register_btn_title">Register</string>

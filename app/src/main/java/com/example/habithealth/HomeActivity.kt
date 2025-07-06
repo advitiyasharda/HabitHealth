@@ -1,5 +1,6 @@
 package com.example.habithealth
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.activity.enableEdgeToEdge
@@ -17,6 +18,9 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var cbSleep: CheckBox
     private lateinit var btnSave: Button
     private lateinit var tvWelcome: TextView
+    private lateinit var btnHistory: Button
+    private lateinit var btnLogout: Button
+
 
     private lateinit var firestore: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
@@ -49,6 +53,21 @@ class HomeActivity : AppCompatActivity() {
 
         // Welcome message
         tvWelcome.text = "Welcome, ${user.email}"
+
+        btnHistory = findViewById(id.btnHistory)
+        btnLogout = findViewById(id.btnLogout)
+
+        btnHistory.setOnClickListener {
+            startActivity(Intent(this, HistoryActivity::class.java))
+        }
+
+        btnLogout.setOnClickListener {
+            auth.signOut()
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+        }
 
         // Save habit data to Firestore
         btnSave.setOnClickListener {

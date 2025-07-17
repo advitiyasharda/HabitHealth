@@ -2,10 +2,9 @@ package com.example.habithealth
 
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.enableEdgeToEdge
+
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.charts.BarChart
@@ -19,34 +18,27 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class HistoryActivity : AppCompatActivity() {
 
-    private lateinit var db: FirebaseFirestore
+
+
     private lateinit var chart: BarChart
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: HabitHistoryAdapter
 
     private val habitList = mutableListOf<HabitRecord>()
-    private val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
+
+    private val firestore by lazy { FirebaseFirestore.getInstance() }
+    private val userId: String by lazy { FirebaseAuth.getInstance().currentUser?.uid ?: "" }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_history)
-        setupWindowInsets()
 
         chart = findViewById(R.id.barChart)
         recyclerView = findViewById(R.id.historyRecycler)
+
         setupRecyclerView()
-
-        db = FirebaseFirestore.getInstance()
+        setupChart()
         fetchHabitHistory()
-    }
-
-    private fun setupWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
     }
 
     private fun setupRecyclerView() {
@@ -55,8 +47,33 @@ class HistoryActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
     }
 
+
+    private fun setupChart() {
+        chart.apply {
+            description.isEnabled = false
+            setDrawGridBackground(false)
+            setDrawBorders(false)
+            legend.isEnabled = false
+            animateY(1000)
+            xAxis.apply {
+                position = XAxis.XAxisPosition.BOTTOM
+                granularity = 1f
+                setDrawLabels(true)
+                textSize = 12f
+                setDrawGridLines(false)
+            }
+            axisLeft.textSize = 12f
+            axisRight.isEnabled = false
+        }
+    }
+
     private fun fetchHabitHistory() {
-        db.collection("users").document(userId).collection("habits")
+        if (userId.isEmpty()) {
+            Log.e("HistoryActivity", "User not logged in")
+            return
+        }
+        firestore.collection("users").document(userId).collection("habits")
+
             .get()
             .addOnSuccessListener { result ->
                 habitList.clear()
@@ -64,62 +81,48 @@ class HistoryActivity : AppCompatActivity() {
                 val dateLabels = mutableListOf<String>()
 
                 result.forEachIndexed { index, doc ->
-                    val record = parseHabitRecord(doc.getString("date"),
-                        doc.getBoolean("water"),
-                        doc.getBoolean("exercise"),
-                        doc.getBoolean("sleep")) ?: return@forEachIndexed
 
-                    habitList.add(record)
-                    barEntries.add(createBarEntry(index, record))
-                    dateLabels.add(record.date)
+                    val timestamp = doc.getLong("date") ?: return@forEachIndexed
+                    val formattedDate = formatDate(timestamp)
+
+                    val water = doc.getBoolean("water") ?: false
+                    val exercise = doc.getBoolean("exercise") ?: false
+                    val sleep = doc.getBoolean("sleep") ?: false
+
+                    habitList.add(HabitRecord(formattedDate, water, exercise, sleep))
+
+                    val completed = listOf(water, exercise, sleep).count { it }
+                    val percent = (completed / 3f) * 100
+                    barEntries.add(BarEntry(index.toFloat(), percent))
+                    dateLabels.add(formattedDate)
+
                 }
 
                 updateChart(barEntries, dateLabels)
                 adapter.notifyDataSetChanged()
             }
             .addOnFailureListener {
-                Log.e("HistoryActivity", "Error fetching history", it)
+
+                Log.e("HistoryActivity", "Failed to fetch habits", it)
             }
     }
 
-    private fun parseHabitRecord(
-        date: String?,
-        water: Boolean?,
-        exercise: Boolean?,
-        sleep: Boolean?
-    ): HabitRecord? {
-        if (date == null) return null
-        return HabitRecord(
-            date,
-            water ?: false,
-            exercise ?: false,
-            sleep ?: false,
-
-            habitsCompleted = TODO(),
-            totalHabits = TODO()
-        )
-    }
-
-    private fun createBarEntry(index: Int, record: HabitRecord): BarEntry {
-        val completedCount = listOf(record.water, record.exercise, record.sleep).count { it }
-        val percent = (completedCount / 3f) * 100
-        return BarEntry(index.toFloat(), percent)
-    }
-
-    private fun updateChart(barEntries: List<BarEntry>, dateLabels: List<String>) {
-        val dataSet = BarDataSet(barEntries, "Daily Completion %")
+    private fun updateChart(barEntries: List<BarEntry>, labels: List<String>) {
+        val dataSet = BarDataSet(barEntries, "Daily Completion %").apply {
+            color = getColor(R.color.teal_700)
+            valueTextSize = 12f
+            valueTextColor = getColor(R.color.black)
+        }
         chart.apply {
             data = BarData(dataSet)
-            description.isEnabled = false
-            animateY(1000)
-            xAxis.apply {
-                valueFormatter = IndexAxisValueFormatter(dateLabels)
-                position = XAxis.XAxisPosition.BOTTOM
-                granularity = 1f
-            }
+            xAxis.valueFormatter = IndexAxisValueFormatter(labels)
             invalidate()
         }
     }
-}
 
+    private fun formatDate(timestamp: Long): String {
+        val sdf = java.text.SimpleDateFormat("dd MMM", java.util.Locale.getDefault())
+        return sdf.format(java.util.Date(timestamp))
+    }
+}
 

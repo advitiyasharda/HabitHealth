@@ -3,6 +3,7 @@ package com.example.habithealth
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+
 import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +16,7 @@ class HabitHistoryAdapter(private val habits: List<HabitRecord>) :
         val waterCheck: CheckBox = itemView.findViewById(R.id.checkWater)
         val exerciseCheck: CheckBox = itemView.findViewById(R.id.checkExercise)
         val sleepCheck: CheckBox = itemView.findViewById(R.id.checkSleep)
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HabitViewHolder {
@@ -24,6 +26,7 @@ class HabitHistoryAdapter(private val habits: List<HabitRecord>) :
     }
 
     override fun onBindViewHolder(holder: HabitViewHolder, position: Int) {
+
         val habit = habits[position]
         holder.dateText.text = habit.date
         holder.waterCheck.isChecked = habit.water
@@ -32,4 +35,5 @@ class HabitHistoryAdapter(private val habits: List<HabitRecord>) :
     }
 
     override fun getItemCount(): Int = habits.size
+
 }

@@ -2,7 +2,9 @@ package com.example.habithealth
 
 import android.os.Bundle
 import android.util.Log
+
 import androidx.appcompat.app.AppCompatActivity
+
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.charts.BarChart
@@ -16,11 +18,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class HistoryActivity : AppCompatActivity() {
 
+
+
     private lateinit var chart: BarChart
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: HabitHistoryAdapter
 
     private val habitList = mutableListOf<HabitRecord>()
+
     private val firestore by lazy { FirebaseFirestore.getInstance() }
     private val userId: String by lazy { FirebaseAuth.getInstance().currentUser?.uid ?: "" }
 
@@ -41,6 +46,7 @@ class HistoryActivity : AppCompatActivity() {
         adapter = HabitHistoryAdapter(habitList)
         recyclerView.adapter = adapter
     }
+
 
     private fun setupChart() {
         chart.apply {
@@ -67,6 +73,7 @@ class HistoryActivity : AppCompatActivity() {
             return
         }
         firestore.collection("users").document(userId).collection("habits")
+
             .get()
             .addOnSuccessListener { result ->
                 habitList.clear()
@@ -74,6 +81,7 @@ class HistoryActivity : AppCompatActivity() {
                 val dateLabels = mutableListOf<String>()
 
                 result.forEachIndexed { index, doc ->
+
                     val timestamp = doc.getLong("date") ?: return@forEachIndexed
                     val formattedDate = formatDate(timestamp)
 
@@ -87,12 +95,14 @@ class HistoryActivity : AppCompatActivity() {
                     val percent = (completed / 3f) * 100
                     barEntries.add(BarEntry(index.toFloat(), percent))
                     dateLabels.add(formattedDate)
+
                 }
 
                 updateChart(barEntries, dateLabels)
                 adapter.notifyDataSetChanged()
             }
             .addOnFailureListener {
+
                 Log.e("HistoryActivity", "Failed to fetch habits", it)
             }
     }
@@ -115,3 +125,4 @@ class HistoryActivity : AppCompatActivity() {
         return sdf.format(java.util.Date(timestamp))
     }
 }
+

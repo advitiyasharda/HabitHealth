@@ -1,18 +1,15 @@
 package com.example.habithealth
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.*
-import android.content.Intent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.habithealth.R.*
-import com.example.habithealth.R.id.*
 import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : AppCompatActivity() {
-
 
     private lateinit var auth: FirebaseAuth
     private lateinit var etEmail: EditText
@@ -20,21 +17,23 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnLogin: Button
     private lateinit var tvRegister: TextView
 
-
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(layout.activity_login)
+        setContentView(R.layout.activity_login)
 
         auth = FirebaseAuth.getInstance()
 
+        // Auto-redirect if user already logged in
+        if (auth.currentUser != null) {
+            startActivity(Intent(this, HomeActivity::class.java))
+            finish()
+        }
 
-        etEmail = findViewById(id.etEmail)
-        etPassword = findViewById(id.etPassword)
-        btnLogin = findViewById(id.btnLogin)
-       // tvRegister = findViewById(id.tvRegister)
+        etEmail = findViewById(R.id.etEmail)
+        etPassword = findViewById(R.id.etPassword)
+        btnLogin = findViewById(R.id.btnLogin)
+        tvRegister = findViewById(R.id.tvRegister)
 
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
@@ -49,7 +48,7 @@ class LoginActivity : AppCompatActivity() {
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show()
-                        startActivity(Intent(this, MainActivity::class.java))
+                        startActivity(Intent(this, HomeActivity::class.java))
                         finish()
                     } else {
                         Toast.makeText(this, "Login Failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
@@ -57,17 +56,16 @@ class LoginActivity : AppCompatActivity() {
                 }
         }
 
-       /* tvRegister.setOnClickListener {
+        // Navigate to registration page
+        tvRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
-        }*/
+        }
 
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(main)) { v, insets ->
+        // Optional: for full screen layout support
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-
     }
 }

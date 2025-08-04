@@ -21,11 +21,13 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var btnHistory: Button
     private lateinit var btnLogout: Button
 
+
     private lateinit var tvWaterStreak: TextView
 
     private lateinit var firestore: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
     private lateinit var prefs: android.content.SharedPreferences
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +54,7 @@ class HomeActivity : AppCompatActivity() {
         cbSleep = findViewById(id.cbSleep)
         btnSave = findViewById(id.btnSaveHabits)
         tvWelcome = findViewById(id.tvWelcome)
+
 
 //        tvWaterStreak = findViewById(R.id.tvWaterStreak)
 
@@ -95,6 +98,7 @@ class HomeActivity : AppCompatActivity() {
                     Toast.makeText(this, "Failed to save: ${it.message}", Toast.LENGTH_LONG).show()
                 }
         }
+
 //        val waterStreak = prefs.getInt("waterStreak", 0)
 //        tvWaterStreak.text = "Streak: $waterStreak"
 
@@ -109,5 +113,6 @@ class HomeActivity : AppCompatActivity() {
 //            tvWaterStreak.text = "Streak: $streak"
 //            // Repeat for other habits
 //        }
+
     }
 }

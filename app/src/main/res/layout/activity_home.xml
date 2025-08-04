@@ -137,16 +137,60 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnSaveHabits" />
 
-<!--    <TextView-->
-<!--        android:id="@+id/tvWaterStreak"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginStart="12dp"-->
-<!--        android:text="Streak: 0"-->
-<!--        android:textColor="#888888"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        tools:layout_editor_absoluteY="715dp" />-->
 
-    <!-- Logout Button -->
+    <!--    <TextView-->
+    <!--        android:id="@+id/tvWaterStreak"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginStart="12dp"-->
+    <!--        android:text="Streak: 0"-->
+    <!--        android:textColor="#888888"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        tools:layout_editor_absoluteY="715dp" />-->
+
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        app:layout_constraintTop_toBottomOf="@id/btnLogout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="741dp"
+        tools:ignore="MissingConstraints">
+
+        <ImageView
+            android:id="@+id/streakIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_flame"
+            app:tint="@color/orange" />
+
+        <TextView
+            android:id="@+id/streakTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="12dp"
+            android:text="Streak: 0"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/streakCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="6dp">
+
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -7,10 +7,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.habithealth.R.*
+import com.example.habithealth.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.firestore
+import java.time.LocalDate
+import java.time.Instant
+import java.time.ZoneId
+import android.util.Log
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.ktx.firestore
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var cbWater: CheckBox
@@ -32,7 +39,7 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(layout.activity_home)
+        setContentView(R.layout.activity_home)
 
         // Window inset padding (optional)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -49,11 +56,11 @@ class HomeActivity : AppCompatActivity() {
         val uid = user?.uid ?: return
 
         // View bindings
-        cbWater = findViewById(id.cbWater)
-        cbExercise = findViewById(id.cbExercise)
-        cbSleep = findViewById(id.cbSleep)
-        btnSave = findViewById(id.btnSaveHabits)
-        tvWelcome = findViewById(id.tvWelcome)
+        cbWater = findViewById(R.id.cbWater)
+        cbExercise = findViewById(R.id.cbExercise)
+        cbSleep = findViewById(R.id.cbSleep)
+        btnSave = findViewById(R.id.btnSaveHabits)
+        tvWelcome = findViewById(R.id.tvWelcome)
 
 
 //        tvWaterStreak = findViewById(R.id.tvWaterStreak)
@@ -63,8 +70,8 @@ class HomeActivity : AppCompatActivity() {
         // Welcome message
         tvWelcome.text = "Welcome, ${user.email}"
 
-        btnHistory = findViewById(id.btnHistory)
-        btnLogout = findViewById(id.btnLogout)
+        btnHistory = findViewById(R.id.btnHistory)
+        btnLogout = findViewById(R.id.btnLogout)
 
         btnHistory.setOnClickListener {
             startActivity(Intent(this, HistoryActivity::class.java))
@@ -98,6 +105,45 @@ class HomeActivity : AppCompatActivity() {
                     Toast.makeText(this, "Failed to save: ${it.message}", Toast.LENGTH_LONG).show()
                 }
         }
+
+        val streakTextView = findViewById<TextView>(R.id.streakTextView)
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        val db = Firebase.firestore
+
+        db.collection("users").document(userId!!)
+            .collection("habits")
+            .orderBy("date", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { documents ->
+                var streak = 0
+                var previousDate = LocalDate.now()
+                for (document in documents) {
+                    val timestamp = document.getLong("date") ?: continue
+                    val date = Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDate()
+
+                    val water = document.getBoolean("water") ?: false
+                    val sleep = document.getBoolean("sleep") ?: false
+                    val exercise = document.getBoolean("exercise") ?: false
+
+                    // Check if it's a consecutive day and all habits were done
+                    if (date == previousDate || date == previousDate.minusDays(1)) {
+                        if (water && sleep && exercise) {
+                            streak++
+                            previousDate = date
+                        } else {
+                            break
+                        }
+                    } else {
+                        break
+                    }
+                }
+
+                streakTextView.text = "Streak: $streak"
+            }
+            .addOnFailureListener {
+                Log.e("STREAK", "Failed to fetch data", it)
+            }
+
 
 //        val waterStreak = prefs.getInt("waterStreak", 0)
 //        tvWaterStreak.text = "Streak: $waterStreak"
